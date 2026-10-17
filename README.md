@@ -82,14 +82,14 @@ Then send `/url https://example.com` to your bot and run the `curl` again: `vers
 ## 3. TV setup (Samsung QE55Q65C, Tizen 7.0)
 
 ### 3.1 Developer Mode
-1. On the TV, open **Apps**, then press **1 2 3 4 5** on the remote (on-screen number pad if needed).
+1. On the TV, open **Apps → App Settings** (on 2023 models this is **not** the Apps page itself), then press **1 2 3 4 5**. If your remote has no number buttons, use its **123** button to open the on-screen number pad.
 2. Turn **Developer mode** **On**, enter your **PC's IP address** as Host PC IP, press OK.
 3. Turn the TV off and on again (hold the power button until the Samsung logo appears for a full restart).
 
 ### 3.2 Install TizenBrew
 1. On your PC, download **TizenBrew Installer** from https://github.com/reisxd/TizenBrewInstaller/releases/latest and run it (PC and TV on the same network).
 2. Choose your TV and **Install TizenBrew**. Tizen 7 asks you to **sign in with a Samsung account** to create a certificate. This is required.
-3. When installed: go back to **Apps → 12345**, set **Host PC IP to `127.0.0.1`**, and restart the TV again (hold power). TizenBrew needs this to inject module scripts. If you see "Could not connect to the SDB Daemon", this step is missing.
+3. When installed: go back to **Apps → App Settings → 12345**, set **Host PC IP to `127.0.0.1`**, and restart the TV again (hold power). TizenBrew needs this to inject module scripts. If you see "Could not connect to the SDB Daemon", this step is missing.
 
 ### 3.3 Add the module
 1. Open **TizenBrew** → **Module Manager** (icon in the header) → **Add GitHub Module**.
