@@ -1,0 +1,17 @@
+services:
+  tv-url-remote:
+    build: .
+    container_name: tv-url-remote
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PORT: "3000"
+      DATA_FILE: /data/state.json
+    ports:
+      # Put your HTTPS reverse proxy in front of this port.
+      - "3000:3000"
+    volumes:
+      - tv-url-data:/data
+
+volumes:
+  tv-url-data:

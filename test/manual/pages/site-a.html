@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Site A - no remote support</title>
+  <style>
+    body { font: 24px sans-serif; background: #fff; color: #222; }
+    .grid { display: table; border-spacing: 24px; }
+    .row { display: table-row; }
+    .cell { display: table-cell; width: 260px; height: 120px; background: #eee; text-align: center; vertical-align: middle; }
+    a:focus, button:focus, div:focus { outline: none; } /* sites often remove focus rings */
+  </style>
+</head>
+<body>
+  <h1>Site A (no arrow-key handling)</h1>
+  <p>Last click: <span id="log">none</span></p>
+  <div class="grid">
+    <div class="row">
+      <a class="cell" id="a1" href="#a1" onclick="return note(this)">Link 1</a>
+      <button class="cell" id="b2" onclick="note(this)">Button 2</button>
+      <div class="cell" id="d3" role="button" onclick="note(this)">Div role=button 3</div>
+    </div>
+    <div class="row">
+      <div class="cell" id="d4" onclick="note(this)">Div onclick 4</div>
+      <a class="cell" id="a5" href="#a5" onclick="return note(this)">Link 5</a>
+      <span class="cell"><input id="search" type="text" placeholder="Search box"></span>
+    </div>
+  </div>
+  <div style="height: 1500px"></div>
+  <a id="bottom" href="#bottom" onclick="return note(this)">Link far below</a>
+  <script>
+    function note(el) { document.getElementById('log').textContent = el.id; return false; }
+  </script>
+  <!-- On the TV TizenBrew injects this; here we load it like the injection would. -->
+  <script src="http://localhost:8080/tvurl.js"></script>
+</body>
+</html>

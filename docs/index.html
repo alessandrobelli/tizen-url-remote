@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" data-tvurl-launcher>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920">
+  <title>TV URL Remote</title>
+  <style>
+    body { margin: 0; background: #111; color: #eee; font: 32px/1.4 sans-serif; }
+    main { width: 1200px; margin: 120px auto; }
+    h1 { font-size: 56px; margin: 0 0 32px; }
+    #status { min-height: 96px; color: #9ad; }
+    #status.error { color: #f88; }
+    label { display: block; margin: 24px 0 8px; }
+    input[type=text], input[type=password] { width: 100%; box-sizing: border-box; font-size: 32px; padding: 12px; }
+    .check { display: block; margin: 24px 0; }
+    button { font-size: 32px; padding: 12px 32px; margin: 24px 24px 0 0; }
+    :focus { outline: 4px solid #00b2ff; outline-offset: 2px; }
+    .hidden { display: none; }
+    .hint { color: #888; font-size: 24px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>TV URL Remote</h1>
+    <p id="status">Loading...</p>
+
+    <div id="menu" class="hidden">
+      <button id="open" type="button">Open current URL</button>
+      <button id="edit" type="button">Settings</button>
+    </div>
+
+    <form id="settings" class="hidden">
+      <label for="api">Server URL (https://...)</label>
+      <input id="api" type="text" autocomplete="off" spellcheck="false" placeholder="https://tv.example.com">
+      <label for="token">API token</label>
+      <input id="token" type="password" autocomplete="off" spellcheck="false">
+      <label class="check"><input id="nav" type="checkbox" checked> Arrow-key navigation on sites without remote support</label>
+      <button id="save" type="submit">Save and open</button>
+      <p class="hint">Use the arrows to move, Enter to type. Back leaves the app.</p>
+    </form>
+  </main>
+  <script src="tvurl.js"></script>
+  <script src="launcher.js"></script>
+</body>
+</html>

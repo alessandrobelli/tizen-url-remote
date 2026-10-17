@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920">
+  <title>TV URL Remote - demo page</title>
+  <style>
+    body { margin: 60px; background: #fff; color: #222; font: 32px/1.4 sans-serif; }
+    .grid { display: table; border-spacing: 32px; }
+    .row { display: table-row; }
+    .cell { display: table-cell; width: 360px; height: 160px; background: #e4e8f0; text-align: center; vertical-align: middle; color: #222; }
+    a:focus, button:focus, div:focus { outline: none; } /* like many sites: no focus ring */
+  </style>
+</head>
+<body>
+  <h1>Demo page <span id="page"></span></h1>
+  <p>Injected script: <b id="injected">not detected</b> | Last click: <b id="log">none</b></p>
+  <div class="grid">
+    <div class="row">
+      <a class="cell" id="link1" href="#" onclick="return note(this)">Link 1</a>
+      <button class="cell" id="button2" onclick="note(this)">Button 2</button>
+      <div class="cell" id="div3" role="button" onclick="note(this)">Div role=button 3</div>
+    </div>
+    <div class="row">
+      <div class="cell" id="div4" onclick="note(this)">Div onclick 4</div>
+      <a class="cell" id="link5" href="#" onclick="return note(this)">Link 5</a>
+      <span class="cell"><input id="search" type="text" placeholder="Text box"></span>
+    </div>
+  </div>
+  <p>Arrows move the blue ring, Enter clicks, Back returns to the launcher menu.</p>
+  <div style="height: 1400px"></div>
+  <a id="bottom" href="#" onclick="return note(this)">Link far below (tests scrolling)</a>
+  <script>
+    function note(el) { document.getElementById('log').textContent = el.id; return false; }
+    document.getElementById('page').textContent = location.search;
+    // TizenBrew injects tvurl.js; there is no script tag for it on purpose.
+    setTimeout(function () {
+      document.getElementById('injected').textContent = window.TVURL ? 'yes' : 'NO';
+    }, 1500);
+  </script>
+</body>
+</html>

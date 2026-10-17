@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Site B - handles arrows itself</title>
+  <style>
+    body { font: 24px sans-serif; background: #223; color: #eee; }
+    .tile { display: inline-block; width: 240px; height: 120px; margin: 16px; background: #446; }
+    .tile.selected { background: #e80; }
+  </style>
+</head>
+<body>
+  <h1>Site B (own arrow-key handling, like a TV web app)</h1>
+  <p>Selected: <span id="sel">0</span> | Back pressed: <span id="back">no</span></p>
+  <div id="tiles"></div>
+  <script>
+    var count = 4, selected = 0, tiles = [];
+    for (var i = 0; i < count; i++) {
+      var t = document.createElement('div');
+      t.className = 'tile';
+      t.textContent = 'Tile ' + i;
+      document.getElementById('tiles').appendChild(t);
+      tiles.push(t);
+    }
+    function render() {
+      for (var i = 0; i < count; i++) tiles[i].className = 'tile' + (i === selected ? ' selected' : '');
+      document.getElementById('sel').textContent = selected;
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.keyCode === 37) { selected = Math.max(0, selected - 1); e.preventDefault(); }
+      if (e.keyCode === 39) { selected = Math.min(count - 1, selected + 1); e.preventDefault(); }
+      if (e.keyCode === 10009 && location.hash === '#own-back') {
+        document.getElementById('back').textContent = 'handled by site';
+        e.preventDefault();
+      }
+      render();
+    });
+    render();
+  </script>
+  <script src="http://localhost:8080/tvurl.js"></script>
+</body>
+</html>

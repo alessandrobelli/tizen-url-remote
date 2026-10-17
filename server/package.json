@@ -1,0 +1,15 @@
+{
+  "name": "tizen-url-remote-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram bot + /state API that tells the TV which URL to show",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  }
+}
