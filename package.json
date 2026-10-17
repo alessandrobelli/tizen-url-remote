@@ -4,7 +4,7 @@
   "description": "TizenBrew module: show a URL chosen via Telegram on a Samsung TV and switch it live",
   "appName": "TV URL Remote",
   "packageType": "mods",
-  "websiteURL": "https://YOUR_GITHUB_USER.github.io/tizen-url-remote/",
+  "websiteURL": "https://alessandrobelli.github.io/tizen-url-remote/",
   "main": "docs/tvurl.js",
   "keys": [],
   "license": "MIT",

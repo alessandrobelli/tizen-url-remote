@@ -39,7 +39,7 @@ apt update && apt install -y curl git && curl -fsSL https://get.docker.com | sh
 
 ### 1.3 Run the server
 ```bash
-git clone https://github.com/YOUR_GITHUB_USER/tizen-url-remote.git
+git clone https://github.com/alessandrobelli/tizen-url-remote.git
 cd tizen-url-remote/server
 cp .env.example .env
 openssl rand -hex 12          # 24 chars; paste as API_TOKEN in .env (you type it once on the TV)
@@ -70,13 +70,13 @@ Then send `/url https://example.com` to your bot and run the `curl` again: `vers
 ## 2. Publish the module (GitHub)
 
 1. Create a **public** GitHub repo named `tizen-url-remote`.
-2. In the root `package.json`, set `websiteURL` to `https://YOUR_GITHUB_USER.github.io/tizen-url-remote/`.
+2. In the root `package.json`, set `websiteURL` to `https://alessandrobelli.github.io/tizen-url-remote/`.
 3. Push:
    ```bash
-   git remote add origin https://github.com/YOUR_GITHUB_USER/tizen-url-remote.git
+   git remote add origin https://github.com/alessandrobelli/tizen-url-remote.git
    git push -u origin main
    ```
-4. Repo **Settings → Pages** → Source: *Deploy from a branch* → Branch `main`, folder `/docs` → Save. After a minute `https://YOUR_GITHUB_USER.github.io/tizen-url-remote/` shows the launcher.
+4. Repo **Settings → Pages** → Source: *Deploy from a branch* → Branch `main`, folder `/docs` → Save. After a minute `https://alessandrobelli.github.io/tizen-url-remote/` shows the launcher.
 5. Copy the latest commit hash (`git rev-parse --short HEAD`). You'll pin the module to it on the TV; jsDelivr caches aggressively, so pinning a commit is the only reliable way to get updates.
 
 ## 3. TV setup (Samsung QE55Q65C, Tizen 7.0)
@@ -93,7 +93,7 @@ Then send `/url https://example.com` to your bot and run the `curl` again: `vers
 
 ### 3.3 Add the module
 1. Open **TizenBrew** → **Module Manager** (icon in the header) → **Add GitHub Module**.
-2. Type `YOUR_GITHUB_USER/tizen-url-remote@COMMIT_HASH` and move focus away from the field (it saves on blur).
+2. Type `alessandrobelli/tizen-url-remote@COMMIT_HASH` and move focus away from the field (it saves on blur).
 3. Go back to the home screen and select **TV URL Remote**.
 4. First run: enter the server URL (`https://tv.example.com`) and the API token, keep or untick arrow-key navigation, then **Save and open**. Settings are remembered.
 5. Optional: TizenBrew **Settings → Autolaunch** to start this module when TizenBrew opens.
@@ -102,9 +102,9 @@ Then send `/url https://example.com` to your bot and run the `curl` again: `vers
 
 You can test the module on the TV before setting up Telegram or Docker. Do sections 2 and 3 first, then:
 
-1. On GitHub, edit `docs/demo/state` and replace `YOUR_GITHUB_USER` with your username. Commit, and wait about a minute for Pages to update.
+1. On GitHub, edit `docs/demo/state` and replace `alessandrobelli` with your username. Commit, and wait about a minute for Pages to update.
 2. On the TV's first-run screen, enter:
-   - Server URL: `https://YOUR_GITHUB_USER.github.io/tizen-url-remote/demo`
+   - Server URL: `https://alessandrobelli.github.io/tizen-url-remote/demo`
    - Token: anything, e.g. `demo` (it isn't checked)
 3. The demo page should open, showing **Injected script: yes**. Try the arrows, Enter (the "Last click" text updates), the text box, and Back.
 4. Live switch: edit `docs/demo/state` on GitHub to `?page=2` and `"version": 2`, then commit. Within 1–2 minutes (the Pages deploy plus a 5 s poll) the TV reloads and the heading shows `?page=2`.
