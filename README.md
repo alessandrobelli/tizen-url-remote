@@ -120,20 +120,6 @@ When the real server is running, go to the launcher menu → **Settings** and en
 | `/current` | Shows the current link and version |
 | `/reload` | TV reopens the current link |
 
-### Cursor mode (Red button)
-
-Press the **Red** button to show a virtual mouse cursor. Use it for things the arrow keys can't reach, e.g. a popup's **×** that's a plain element with a JavaScript click handler.
-
-| Key | In cursor mode |
-|---|---|
-| Arrows | Move the cursor (it speeds up while held); at the screen edge the page scrolls |
-| Enter | Click under the cursor |
-| Back or Red | Leave cursor mode |
-
-While cursor mode is on, the site doesn't receive arrows, Enter or Back. To type into a field, click it with the cursor, then press Red to leave cursor mode before typing.
-
-### Launcher
-
 On the TV, pressing a key during the 3-second "Opening..." message on the launcher opens its menu (where Settings is). Pressing Back from the first opened page also returns to that menu.
 
 ## Updating the module
