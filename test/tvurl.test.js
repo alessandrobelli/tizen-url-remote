@@ -98,6 +98,89 @@ test('chooseCandidate returns null when nothing is in that direction', () => {
   assert.equal(TVURL.chooseCandidate(FROM, [{ rect: rect(0, 0, 10, 10), item: 'x' }], 'down'), null);
 });
 
+// --- Back closes popups ---------------------------------------------------
+
+for (const label of ['×', '✕', '✖', 'x', 'X', 'Close', 'close dialog', 'Chiudi', 'Dismiss']) {
+  test(`isCloseLabel accepts "${label}"`, () => {
+    assert.equal(TVURL.isCloseLabel(label), true);
+  });
+}
+
+for (const label of ['', 'Play', 'Next episode', 'Xbox', 'Closed captions', 'OK']) {
+  test(`isCloseLabel rejects "${label}"`, () => {
+    assert.equal(TVURL.isCloseLabel(label), false);
+  });
+}
+
+// --- Row navigation --------------------------------------------------------
+
+const VIEW = { width: 1920, height: 1080 };
+
+test('verticalPool keeps only on-screen candidates when moving up/down', () => {
+  const pool = TVURL.verticalPool([
+    { rect: rect(100, 500, 200, 300), item: 'visible' },
+    { rect: rect(2500, 500, 200, 300), item: 'scrolled-off-right' },
+  ], 'down', VIEW);
+  assert.deepEqual([...pool.map((c) => c.item)], ['visible']); // copy: array comes from the vm realm
+});
+
+test('verticalPool falls back to all candidates when none are on screen', () => {
+  const pool = TVURL.verticalPool([{ rect: rect(2500, 500, 200, 300), item: 'off' }], 'up', VIEW);
+  assert.equal(pool.length, 1);
+});
+
+test('verticalPool leaves left/right moves untouched', () => {
+  const pool = TVURL.verticalPool([{ rect: rect(2500, 500, 200, 300), item: 'off' }, { rect: rect(0, 0, 10, 10), item: 'on' }], 'right', VIEW);
+  assert.equal(pool.length, 2);
+});
+
+// --- Player keys -----------------------------------------------------------
+
+test('playerAction maps remote keys to player actions', () => {
+  assert.deepEqual(
+    [13, 10252, 415, 19, 39, 417, 37, 412, 38].map(TVURL.playerAction),
+    ['toggle', 'toggle', 'play', 'pause', 'forward', 'forward', 'rewind', 'rewind', null]
+  );
+});
+
+function fakeVideo(paused, currentTime, duration) {
+  return {
+    paused, currentTime, duration,
+    play() { this.paused = false; },
+    pause() { this.paused = true; },
+  };
+}
+
+test('applyPlayerAction toggle plays a paused video', () => {
+  const video = fakeVideo(true, 0, 100);
+  TVURL.applyPlayerAction(video, 'toggle');
+  assert.equal(video.paused, false);
+});
+
+test('applyPlayerAction toggle pauses a playing video', () => {
+  const video = fakeVideo(false, 0, 100);
+  TVURL.applyPlayerAction(video, 'toggle');
+  assert.equal(video.paused, true);
+});
+
+test('applyPlayerAction forward skips 10 seconds', () => {
+  const video = fakeVideo(false, 30, 100);
+  TVURL.applyPlayerAction(video, 'forward');
+  assert.equal(video.currentTime, 40);
+});
+
+test('applyPlayerAction forward stops at the end', () => {
+  const video = fakeVideo(false, 95, 100);
+  TVURL.applyPlayerAction(video, 'forward');
+  assert.equal(video.currentTime, 100);
+});
+
+test('applyPlayerAction rewind stops at zero', () => {
+  const video = fakeVideo(false, 4, 100);
+  TVURL.applyPlayerAction(video, 'rewind');
+  assert.equal(video.currentTime, 0);
+});
+
 test('chooseCandidate ignores a container that wraps the current element', () => {
   const wrapper = rect(90, 90, 300, 70);
   assert.equal(TVURL.chooseCandidate(FROM, [{ rect: wrapper, item: 'wrapper' }], 'right'), null);

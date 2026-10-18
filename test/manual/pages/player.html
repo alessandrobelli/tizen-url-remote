@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Player iframe</title>
+  <style>body { margin: 0; background: #000; } video { width: 100%; height: 100vh; display: block; }</style>
+</head>
+<body>
+  <video id="video" muted></video>
+  <script>
+    // Offline test source: an animated canvas stream (play/pause works; seeking
+    // is recorded via a currentTime spy because live streams can't seek).
+    var canvas = document.createElement('canvas');
+    canvas.width = 320; canvas.height = 180;
+    var ctx = canvas.getContext('2d');
+    var frame = 0;
+    setInterval(function () { ctx.fillStyle = 'hsl(' + (frame++ % 360) + ',60%,40%)'; ctx.fillRect(0, 0, 320, 180); }, 50);
+    var video = document.getElementById('video');
+    video.srcObject = canvas.captureStream(20);
+    var time = 30;
+    window.seeks = [];
+    Object.defineProperty(video, 'currentTime', {
+      get: function () { return time; },
+      set: function (t) { time = t; window.seeks.push(t); }
+    });
+    Object.defineProperty(video, 'duration', { get: function () { return 600; } });
+  </script>
+  <script src="http://localhost:8080/tvurl.js"></script>
+</body>
+</html>

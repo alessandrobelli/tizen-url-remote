@@ -21,7 +21,9 @@ Telegram ──/url──▶ server (bot + API, Docker on Proxmox) ◀──GET 
 - `GET /state` returns `{ "url": "...", "version": 7 }`. `version` increases on every `/url` and `/reload`; the TV navigates whenever it sees a new version (`/reload` reopens the same URL).
 - TizenBrew downloads the module from GitHub via jsDelivr, so the repo must be **public**. It contains no secrets: the server URL and token are typed once on the TV and stored there.
 - The launcher passes the settings to the opened site in a `#tvurl=...` (or `?tvurl=...`) fragment. `tvurl.js` saves them in that site's `sessionStorage` and immediately removes the fragment from the address bar.
-- Arrow keys: `tvurl.js` only moves focus if the site didn't handle the key itself (no `preventDefault`, no focus change of its own). Enter clicks the focused element. Back goes to the previous page unless the site handles it. Pressing Back from the first page returns to the launcher menu.
+- Arrow keys: `tvurl.js` only moves focus if the site didn't handle the key itself (no `preventDefault`, no focus change of its own). Enter clicks the focused element. Poster cards that are clickable only through JavaScript (class names containing card/poster/tile/slide) are included. Up/down prefers posters that are on screen, and a poster cut off at the edge of a row is scrolled to the centre.
+- Back, unless the site handles it: closes a visible popup first (clicks its ×/Close control, or sends Escape), then leaves fullscreen, then goes to the previous page. If a popup doesn't close, a second Back within 4 s goes back anyway. From the first page, Back returns to the launcher menu.
+- Player: when a video covers at least a quarter of the screen and nothing else is focused, Enter plays/pauses and ←/→ skip 10 s. The ⏯ ⏪ ⏩ media keys work whenever a video is on screen. This also works inside player iframes; Back pressed inside an iframe is passed to the page.
 - Injected code is plain ES5, never uses `innerHTML` (works with Trusted Types), and styles the focus ring via CSSOM (works with a strict `style-src`).
 
 ## 1. Server (Proxmox LXC + Docker)
@@ -120,7 +122,17 @@ When the real server is running, go to the launcher menu → **Settings** and en
 | `/current` | Shows the current link and version |
 | `/reload` | TV reopens the current link |
 
-On the TV, pressing a key during the 3-second "Opening..." message on the launcher opens its menu (where Settings is). Pressing Back from the first opened page also returns to that menu.
+On the TV:
+
+| Key | Effect |
+|---|---|
+| Arrows | Move between links and poster cards (blue outline, slightly enlarged) |
+| Enter | Click the focused item; on a video with nothing focused, play/pause |
+| ← / → on a video | Skip 10 s back/forward |
+| ⏯ ⏪ ⏩ | Play/pause, skip back/forward |
+| Back | Close popup → leave fullscreen → previous page |
+
+Pressing a key during the 3-second "Opening..." message on the launcher opens its menu (where Settings is). Pressing Back from the first opened page also returns to that menu.
 
 ## Updating the module
 

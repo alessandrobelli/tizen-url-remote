@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Site D - Netflix-like catalog</title>
+  <style>
+    body { margin: 0; font: 20px sans-serif; background: #111; color: #eee; }
+    header a { color: #eee; margin: 16px; display: inline-block; }
+    h2 { margin: 24px 16px 8px; }
+    .row { white-space: nowrap; overflow: hidden; padding: 8px 16px; }
+    .card { display: inline-block; width: 220px; height: 124px; margin-right: 12px; background: #335; }
+    .modal { position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: none; }
+    .modal .box { position: absolute; left: 30%; top: 25%; width: 40%; padding: 32px; background: #445; }
+    .modal .x { position: absolute; right: 16px; top: 8px; font-size: 36px; }
+    #escDialog { position: fixed; left: 35%; top: 35%; width: 30%; padding: 24px; background: #543; display: none; }
+    iframe { width: 960px; height: 540px; border: 0; margin: 16px; }
+  </style>
+</head>
+<body>
+  <header><a href="#home">Home</a><a href="#series">Series</a></header>
+  <p style="margin: 0 16px">Last action: <span id="log">none</span></p>
+  <h2>Trending</h2>
+  <div class="row" id="row1"></div>
+  <h2>New</h2>
+  <div class="row" id="row2"></div>
+
+  <!-- Popup whose close button is a bare "×" with a JS handler (no class, role or label). -->
+  <div class="modal" id="modal"><div class="box"><span class="x" id="modalClose">&times;</span><h3>Update</h3><p>Popup text.</p></div></div>
+  <!-- Dialog with no close button that only listens for Escape. -->
+  <div role="dialog" id="escDialog">Press Escape to close me.</div>
+
+  <iframe id="player" src="player.html"></iframe>
+  <script>
+    function log(text) { document.getElementById('log').textContent = text; }
+    function fillRow(id, count) {
+      for (var i = 1; i <= count; i++) {
+        var card = document.createElement('div');
+        card.className = 'card';
+        card.id = id + '-card' + i;
+        card.textContent = id + ' #' + i;
+        card.addEventListener('click', function () { log('opened ' + this.id); });
+        document.getElementById(id).appendChild(card);
+      }
+    }
+    fillRow('row1', 12);
+    fillRow('row2', 12);
+    document.getElementById('modalClose').addEventListener('click', function () {
+      document.getElementById('modal').style.display = 'none';
+      log('modal closed');
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.keyCode === 27 && document.getElementById('escDialog').style.display === 'block') {
+        document.getElementById('escDialog').style.display = 'none';
+        log('dialog closed by Escape');
+      }
+    });
+    function openModal() { document.getElementById('modal').style.display = 'block'; }
+    function openEscDialog() { document.getElementById('escDialog').style.display = 'block'; }
+  </script>
+  <script src="http://localhost:8080/tvurl.js"></script>
+</body>
+</html>
