@@ -23,9 +23,7 @@
   var ORTHO_WEIGHT = 3;
   var KEY_ENTER = 13;
   var KEY_BACK = 10009;
-  // Cursor mode toggles; registered via "keys" in package.json. Red for remotes
-  // with colour buttons, Channel Down for the Smart Remote (no colour buttons).
-  var CURSOR_TOGGLE_KEYS = { 403: 'ColorF0Red', 428: 'ChannelDown' };
+  var KEY_RED = 403; // toggles cursor mode; registered via "keys" in package.json
   var CURSOR_MIN_STEP = 20;
   var CURSOR_MAX_STEP = 80;
   var CURSOR_HOLD_MS = 250; // moves closer together than this count as "key held"
@@ -422,7 +420,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Cursor mode (Red or CH-): a virtual mouse for things arrows can't reach,
+  // Cursor mode (Red key): a virtual mouse for things arrows can't reach,
   // e.g. a popup "x" that is a plain <span> with a JS click handler.
   // ---------------------------------------------------------------------
 
@@ -483,7 +481,7 @@
 
   // Returns true when cursor mode consumed the key.
   function handleCursorKey(key) {
-    if (CURSOR_TOGGLE_KEYS[key]) {
+    if (key === KEY_RED) {
       if (cursor.on) hideCursor(); else showCursor();
       return true;
     }
