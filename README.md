@@ -120,17 +120,17 @@ When the real server is running, go to the launcher menu → **Settings** and en
 | `/current` | Shows the current link and version |
 | `/reload` | TV reopens the current link |
 
-### Cursor mode (Red button)
+### Cursor mode (CH ▼ or Red)
 
-Press the **Red** button to show a virtual mouse cursor. Use it for things the arrow keys can't reach, e.g. a popup's **×** that's a plain element with a JavaScript click handler.
+Press **CH ▼** (channel down) to show a virtual mouse cursor. The **Red** button does the same on remotes that have one (the SmartThings app's virtual Red doesn't reach the page). Use it for things the arrow keys can't reach, e.g. a popup's **×** that's a plain element with a JavaScript click handler.
 
 | Key | In cursor mode |
 |---|---|
 | Arrows | Move the cursor (it speeds up while held); at the screen edge the page scrolls |
 | Enter | Click under the cursor |
-| Back or Red | Leave cursor mode |
+| Back, CH ▼ or Red | Leave cursor mode |
 
-While cursor mode is on, the site doesn't receive arrows, Enter or Back. To type into a field, click it with the cursor, then press Red to leave cursor mode before typing.
+While cursor mode is on, the site doesn't receive arrows, Enter or Back. To type into a field, click it with the cursor, then press CH ▼ to leave cursor mode before typing.
 
 ### Launcher
 
