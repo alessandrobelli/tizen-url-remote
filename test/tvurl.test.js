@@ -98,6 +98,52 @@ test('chooseCandidate returns null when nothing is in that direction', () => {
   assert.equal(TVURL.chooseCandidate(FROM, [{ rect: rect(0, 0, 10, 10), item: 'x' }], 'down'), null);
 });
 
+const VIEW = { width: 1920, height: 1080 };
+
+test('moveCursor moves right by the step', () => {
+  assert.deepEqual({ ...TVURL.moveCursor({ x: 100, y: 100 }, 'right', 20, VIEW) }, { x: 120, y: 100, scrollX: 0, scrollY: 0 });
+});
+
+test('moveCursor moves up by the step', () => {
+  assert.deepEqual({ ...TVURL.moveCursor({ x: 100, y: 100 }, 'up', 20, VIEW) }, { x: 100, y: 80, scrollX: 0, scrollY: 0 });
+});
+
+test('moveCursor scrolls the page instead of leaving the bottom edge', () => {
+  const next = TVURL.moveCursor({ x: 100, y: 1075 }, 'down', 20, VIEW);
+  assert.equal(next.y, 1079);
+  assert.equal(next.scrollY, 20);
+});
+
+test('moveCursor scrolls up at the top edge', () => {
+  const next = TVURL.moveCursor({ x: 100, y: 0 }, 'up', 20, VIEW);
+  assert.equal(next.y, 0);
+  assert.equal(next.scrollY, -20);
+});
+
+test('moveCursor clamps at the left edge and scrolls left', () => {
+  const next = TVURL.moveCursor({ x: 5, y: 100 }, 'left', 20, VIEW);
+  assert.equal(next.x, 0);
+  assert.equal(next.scrollX, -20);
+});
+
+// cursorStep(previousStep, msSinceLastMove)
+test('cursorStep speeds up while the key is held', () => {
+  const first = TVURL.cursorStep(0, Infinity);
+  assert.ok(TVURL.cursorStep(first, 100) > first);
+});
+
+test('cursorStep resets after a pause', () => {
+  const first = TVURL.cursorStep(0, Infinity);
+  const fast = TVURL.cursorStep(TVURL.cursorStep(first, 100), 100);
+  assert.equal(TVURL.cursorStep(fast, 1000), first);
+});
+
+test('cursorStep never exceeds the maximum', () => {
+  let step = TVURL.cursorStep(0, Infinity);
+  for (let i = 0; i < 100; i++) step = TVURL.cursorStep(step, 50);
+  assert.ok(step <= 80);
+});
+
 test('chooseCandidate ignores a container that wraps the current element', () => {
   const wrapper = rect(90, 90, 300, 70);
   assert.equal(TVURL.chooseCandidate(FROM, [{ rect: wrapper, item: 'wrapper' }], 'right'), null);

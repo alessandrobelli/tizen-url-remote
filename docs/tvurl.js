@@ -23,6 +23,10 @@
   var ORTHO_WEIGHT = 3;
   var KEY_ENTER = 13;
   var KEY_BACK = 10009;
+  var KEY_RED = 403; // toggles cursor mode; registered via "keys" in package.json
+  var CURSOR_MIN_STEP = 20;
+  var CURSOR_MAX_STEP = 80;
+  var CURSOR_HOLD_MS = 250; // moves closer together than this count as "key held"
   var DIRECTIONS = { 37: 'left', 38: 'up', 39: 'right', 40: 'down' };
   var FOCUSABLE_SELECTOR = [
     'a[href]', 'button', 'input', 'select', 'textarea', 'summary', '[tabindex]',
@@ -129,6 +133,32 @@
       }
     }
     return best;
+  }
+
+  // ---------------------------------------------------------------------
+  // Cursor mode math (pure, unit-tested)
+  // ---------------------------------------------------------------------
+
+  // Grows the step while an arrow is held, back to the minimum after a pause.
+  function cursorStep(previousStep, msSinceLastMove) {
+    if (msSinceLastMove > CURSOR_HOLD_MS || !previousStep) return CURSOR_MIN_STEP;
+    return Math.min(CURSOR_MAX_STEP, Math.round(previousStep * 1.3));
+  }
+
+  // pos: { x, y } in viewport pixels; view: { width, height }.
+  // Returns the new position, clamped to the viewport, plus how far to scroll
+  // the page when the cursor pushes against an edge.
+  function moveCursor(pos, dir, step, view) {
+    var dx = dir === 'left' ? -step : dir === 'right' ? step : 0;
+    var dy = dir === 'up' ? -step : dir === 'down' ? step : 0;
+    var x = Math.max(0, Math.min(view.width - 1, pos.x + dx));
+    var y = Math.max(0, Math.min(view.height - 1, pos.y + dy));
+    return {
+      x: x,
+      y: y,
+      scrollX: x === pos.x + dx ? 0 : dx,
+      scrollY: y === pos.y + dy ? 0 : dy
+    };
   }
 
   // ---------------------------------------------------------------------
@@ -362,17 +392,126 @@
     root.scrollBy(dx, dy);
   }
 
-  function synthesizeClick(el) {
-    var types = ['mousedown', 'mouseup', 'click'];
-    for (var i = 0; i < types.length; i++) {
-      var event = root.document.createEvent('MouseEvents');
-      event.initMouseEvent(types[i], true, true, root, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
-      el.dispatchEvent(event);
+  function dispatchPointer(el, type, x, y) {
+    if (typeof root.PointerEvent !== 'function') return; // old Tizen: mouse events only
+    try {
+      el.dispatchEvent(new root.PointerEvent(type, {
+        bubbles: true, cancelable: true, clientX: x, clientY: y,
+        pointerType: 'mouse', isPrimary: true, button: 0
+      }));
+    } catch (e) { /* PointerEvent constructor unsupported */ }
+  }
+
+  function dispatchMouse(el, type, x, y) {
+    var event = root.document.createEvent('MouseEvents');
+    event.initMouseEvent(type, true, true, root, 1, x, y, x, y, false, false, false, false, 0, null);
+    el.dispatchEvent(event);
+  }
+
+  // x/y are only known in cursor mode; spatial navigation clicks at 0,0.
+  function synthesizeClick(el, x, y) {
+    x = x || 0;
+    y = y || 0;
+    dispatchPointer(el, 'pointerdown', x, y);
+    dispatchMouse(el, 'mousedown', x, y);
+    dispatchPointer(el, 'pointerup', x, y);
+    dispatchMouse(el, 'mouseup', x, y);
+    dispatchMouse(el, 'click', x, y);
+  }
+
+  // ---------------------------------------------------------------------
+  // Cursor mode (Red key): a virtual mouse for things arrows can't reach,
+  // e.g. a popup "x" that is a plain <span> with a JS click handler.
+  // ---------------------------------------------------------------------
+
+  var CURSOR_SIZE = 24;
+  var cursor = { on: false, el: null, x: -1, y: -1, step: 0, lastMove: 0 };
+
+  function drawCursor() {
+    if (!cursor.el.parentNode) root.document.documentElement.appendChild(cursor.el); // SPA wiped it
+    cursor.el.style.setProperty('left', (cursor.x - CURSOR_SIZE / 2) + 'px', 'important');
+    cursor.el.style.setProperty('top', (cursor.y - CURSOR_SIZE / 2) + 'px', 'important');
+  }
+
+  function showCursor() {
+    var el = root.document.createElement('div');
+    var styles = {
+      'position': 'fixed', 'width': CURSOR_SIZE + 'px', 'height': CURSOR_SIZE + 'px',
+      'margin': '0', 'padding': '0', 'box-sizing': 'border-box', 'border-radius': '50%',
+      'border': '3px solid #fff', 'background': 'rgba(0, 178, 255, 0.7)',
+      'box-shadow': '0 0 8px #000', 'z-index': '2147483647', 'pointer-events': 'none'
+    };
+    for (var name in styles) {
+      if (styles.hasOwnProperty(name)) el.style.setProperty(name, styles[name], 'important');
     }
+    if (cursor.x < 0) {
+      cursor.x = Math.round(root.innerWidth / 2);
+      cursor.y = Math.round(root.innerHeight / 2);
+    }
+    cursor.el = el;
+    cursor.on = true;
+    drawCursor();
+  }
+
+  function hideCursor() {
+    if (cursor.el && cursor.el.parentNode) cursor.el.parentNode.removeChild(cursor.el);
+    cursor.el = null;
+    cursor.on = false;
+  }
+
+  function stepCursor(dir) {
+    var now = new Date().getTime();
+    cursor.step = cursorStep(cursor.step, now - cursor.lastMove);
+    cursor.lastMove = now;
+    var next = moveCursor(cursor, dir, cursor.step, { width: root.innerWidth, height: root.innerHeight });
+    cursor.x = next.x;
+    cursor.y = next.y;
+    if (next.scrollX || next.scrollY) root.scrollBy(next.scrollX, next.scrollY);
+    drawCursor();
+  }
+
+  function clickAtCursor() {
+    var target = root.document.elementFromPoint(cursor.x, cursor.y); // cursor has pointer-events:none
+    if (!target) return;
+    if (isEditable(target) || isNativelyClickable(target)) {
+      try { target.focus(); } catch (e) { /* not focusable */ }
+    }
+    synthesizeClick(target, cursor.x, cursor.y);
+  }
+
+  // Returns true when cursor mode consumed the key.
+  function handleCursorKey(key) {
+    if (key === KEY_RED) {
+      if (cursor.on) hideCursor(); else showCursor();
+      return true;
+    }
+    if (!cursor.on) return false;
+    if (DIRECTIONS[key]) {
+      stepCursor(DIRECTIONS[key]);
+      return true;
+    }
+    if (key === KEY_ENTER) {
+      clickAtCursor();
+      return true;
+    }
+    if (key === KEY_BACK) {
+      hideCursor();
+      return true;
+    }
+    return false;
   }
 
   function installKeyHandlers(navEnabled) {
     var focusAtStart = null;
+
+    // Registered first and in capture phase: in cursor mode the site never
+    // sees arrows/Enter/Back, so its own navigation can't fight the cursor.
+    root.addEventListener('keydown', function (e) {
+      if (!handleCursorKey(e.keyCode)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    }, true);
 
     // Capture phase runs before the site's handlers: remember where focus was.
     root.addEventListener('keydown', function () {
@@ -420,7 +559,9 @@
     scoreCandidate: scoreCandidate,
     chooseCandidate: chooseCandidate,
     fetchState: fetchState,
-    isBackForwardLoad: isBackForwardLoad
+    isBackForwardLoad: isBackForwardLoad,
+    cursorStep: cursorStep,
+    moveCursor: moveCursor
   };
   root.TVURL = api;
 
